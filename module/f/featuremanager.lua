@@ -95,7 +95,7 @@ function FeatureManager:InitializeAllFeatures(notifyLib, logger)
         {
             Title = "HellZone",
             Text = "Loading Script...",
-            Icon = "rbxassetid://126105526390795",
+            Icon = "rbxassetid://77461382621338",
             Duration = 10
         })
     end
@@ -138,7 +138,7 @@ function FeatureManager:InitializeAllFeatures(notifyLib, logger)
         {
             Title = "HellZone",
             Text = string.format("%d/%d features loaded successfully", successCount, self.TotalFeatures),
-            Icon = "rbxassetid://126105526390795",
+            Icon = "rbxassetid://77461382621338",
             Duration = 5
         }
     )
