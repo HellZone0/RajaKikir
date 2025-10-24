@@ -157,16 +157,31 @@ function Helpers.getEnchantStonesForTrade()
 end
 
 --- Player List
-function Helpers.listPlayers(excludeSelf)
-    local me = LocalPlayer and LocalPlayer.Name
-    local t = {}
-    for _, p in ipairs(Players:GetPlayers()) do
-        if not excludeSelf or (me and p.Name ~= me) then
-            table.insert(t, p.Name)
+function Helpers.listPlayers(excludeSelf, onUpdate)
+    local function get()
+        local me = LocalPlayer and LocalPlayer.Name
+        local t = {}
+        for _, p in ipairs(Players:GetPlayers()) do
+            if not excludeSelf or (me and p.Name ~= me) then
+                table.insert(t, p.Name)
+            end
         end
+        table.sort(t, function(a, b) return a:lower() < b:lower() end)
+        return t
     end
-    table.sort(t, function(a, b) return a:lower() < b:lower() end)
-    return t
+    
+    if onUpdate then
+        Players.PlayerAdded:Connect(function()
+            task.wait(0.1)
+            onUpdate(get())
+        end)
+        Players.PlayerRemoving:Connect(function()
+            task.wait(0.1)
+            onUpdate(get())
+        end)
+    end
+    
+    return get()
 end
 
 --- Normalize dropdown option
@@ -456,6 +471,88 @@ function Helpers.getVariantNames()
     end
     table.sort(variantNames)
     return variantNames
+end
+
+--- Market Item Names (for Merchant)
+function Helpers.getMarketItemNames()
+    local MarketItemData = require(ReplicatedStorage.Shared.MarketItemData)
+    local itemNames = {}
+    
+    for _, itemData in ipairs(MarketItemData) do
+        if not itemData.SkinCrate then
+            local name = itemData.Identifier or itemData.DisplayName or "Unknown"
+            table.insert(itemNames, name)
+        end
+    end
+    
+    table.sort(itemNames)
+    return itemNames
+end
+
+--- Get Current Merchant Stock (for Description)
+function Helpers.getCurrentMerchantStock()
+    local MarketItemData = require(ReplicatedStorage.Shared.MarketItemData)
+    local merchantReplion = Replion.Client:WaitReplion("Merchant")
+    
+    local currentItems = merchantReplion:GetExpect("Items")
+    local stockInfo = {}
+    
+    for _, itemId in ipairs(currentItems) do
+        for _, marketData in ipairs(MarketItemData) do
+            if marketData.Id == itemId and not marketData.SkinCrate then
+                local name = marketData.Identifier or marketData.DisplayName or "Unknown"
+                local price = marketData.Price and Helpers.abbreviateNumber(marketData.Price) or "N/A"
+                local currency = marketData.Currency or "Coins"
+                
+                table.insert(stockInfo, string.format("%s - %s %s", name, price, currency))
+                break
+            end
+        end
+    end
+    
+    if #stockInfo == 0 then
+        return "No items available"
+    end
+    
+    table.insert(stockInfo, 1, string.format("Available Items (%d):", #stockInfo))
+    table.insert(stockInfo, 2, "")
+    
+    return table.concat(stockInfo, "\n")
+end
+
+--- Monitor Merchant Stock (for real-time updates)
+function Helpers.monitorMerchantStock(callback)
+    local MarketItemData = require(ReplicatedStorage.Shared.MarketItemData)
+    local merchantReplion = Replion.Client:WaitReplion("Merchant")
+    
+    local connection = merchantReplion:OnChange("Items", function(currentItems)
+        local stockInfo = {}
+        
+        for _, itemId in ipairs(currentItems) do
+            for _, marketData in ipairs(MarketItemData) do
+                if marketData.Id == itemId and not marketData.SkinCrate then
+                    local name = marketData.Identifier or marketData.DisplayName or "Unknown"
+                    local price = marketData.Price and Helpers.abbreviateNumber(marketData.Price) or "N/A"
+                    local currency = marketData.Currency or "Coins"
+                    
+                    table.insert(stockInfo, string.format("%s - %s %s", name, price, currency))
+                    break
+                end
+            end
+        end
+        
+        if #stockInfo == 0 then
+            callback("No items available")
+            return
+        end
+        
+        table.insert(stockInfo, 1, string.format("Available Items (%d):", #stockInfo))
+        table.insert(stockInfo, 2, "")
+        
+        callback(table.concat(stockInfo, "\n"))
+    end)
+    
+    return connection
 end
 
 return Helpers
