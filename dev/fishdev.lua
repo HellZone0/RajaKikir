@@ -177,13 +177,12 @@ local Setting    = Group:Tab({ Title = "Settings", Image = "settings"})
 
 --- === CHANGELOG & DISCORD LINK === ---
 local CHANGELOG = table.concat({
-    "[+] Added Hide Nickname",
-    "[+] Added Auto Finish Fishing",
-    "[/] Fixed Auto Send Trade",
-    "[/] Fixed Player List",
-    "[/] Changed Quest Progress Info, refresh every 60 seconds",
-    "[/] Improved Auto Favorite, now support Mutation + Rarity or etc",
-    "[/] Fixed & Improved Balatant"
+    "[+] Added Favorite by Mutation",
+    "[+] Added Buy Merchant",
+    "[/] Improved Anti AFK",
+    "[/] Improved Auto Favorite",
+    "[/] Fixed Webhook (idk why this not working cz for me it works)",
+    "<b>Confused about new features? Join Discord</b>"
 }, "\n")
 local DISCORD = table.concat({
     "https://discord.gg/W7QvDkeU",
@@ -704,16 +703,6 @@ local autofav_tgl = FavoriteSection:Toggle({
         
         if v then
             if F.AutoFavorite then
-                local hasAnyFilter = #selectedRarities > 0 or #selectedFishNames > 0 or #selectedMutations > 0
-                
-                if not hasAnyFilter then
-                    Window:Notify({ 
-                        Title = "Auto Favorite", 
-                        Desc = "Select at least one filter first!", 
-                        Duration = 3 
-                    })
-                    return
-                end
                 
                 if F.AutoFavorite.SetTiers then
                     F.AutoFavorite:SetTiers(selectedRarities)
@@ -1275,20 +1264,51 @@ local shopweather_tgl = WeatherSection:Toggle({
 local MerchantSection = Shop:Section({ Title = "Merchant", Opened = false })
 local merchantstock = MerchantSection:Paragraph({
 	Title = gradient("<b>Merchant Stock</b>"),
-	Desc = "CHANGELOG"
+	Desc = Helpers.getCurrentMerchantStock()
 })
+
+local selectedItemsMerchant = {}
+
 local merchant_ddm = MerchantSection:Dropdown({
     Title = "<b>Select Item</b>",
     Search = true,
     Multi = true,
     Required = false,
-    Values = {"Enchantment Stone", "Mystery Egg", "Treasure Chest", "Golden Rod", "Platinum Rod", "Diamond Rod", "Mythic Rod", "Legendary Rod", "Secret Rod"},
+    Values = Helpers.getMarketItemNames(),
     Callback = function(v)
-    end
+        selectedItemsMerchant = Helpers.normalizeList(v or {})
+        if F.AutoBuyMerchant and F.AutoBuyMerchant.SetSelectedItems then
+        F.AutoBuyMerchant:SetSelectedItems(selectedItemsMerchant)
+        end
+end
 }, "merchantddm")
+
 MerchantSection:Button({
 	Title = "<b>Buy Merchant Item</b>",
 	Callback = function()
+        F.AutoBuyMerchant:Start({ selectedItems = selectedItemsMerchant, interDelay = 0.5 })
+    end
+})
+
+local merchantautobuy_tgl = MerchantSection:Toggle({
+    Title = "<b>Auto Buy Merchant Item</b>",
+    Default = false,
+    Callback = function(v)
+    end
+}, "merchantautobuytgl")
+
+local merchantrefresh_tgl = MerchantSection:Toggle({
+    Title = "<b>Auto Refresh Merchant Stock</b>",
+    Default = false,
+    Callback = function(v)
+    end
+}, "merchantrefreshtgl")
+
+MerchantSection:Button({
+	Title = "<b>Refresh Merchant Stock</b>",
+	Callback = function()
+        Helpers.monitorMerchantStock(function(text)
+        merchantstock:SetDesc(text) end)
     end
 })
 
@@ -1534,7 +1554,7 @@ PositionSection:Button({
 local VisualSection = Misc:Section({ Title = "Visual", Opened = false })
 -- State variables
 local customName = "This is HellZone"  -- Default custom name
-local customLevel = "Lv: 9999"       -- Default custom level
+local customLevel = "Lv: 999999"       -- Default custom level
 local nameChangerConnection = nil
 
 -- Function untuk change overhead
