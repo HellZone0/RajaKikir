@@ -26,7 +26,7 @@ local FEATURE_URLS = {
     AntiAfk            = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/antiafk.lua",
     AutoEnchantRod     = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/autoenchantrod.lua",
     AutoEnchantRod2    = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/autoenchantrod2.lua",
-    AutoFavorite       = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/autofavoritefishall.lua",
+    AutoFavorite       = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/autofavoritefish.lua",
     --AutoFavoriteFishV2 = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/autofavoritefishv2.lua",
     --AutoFavoriteFishV3 = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/autofavoritefishv3.lua",
     UnfavoriteAllFish  = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/unfavoritefish.lua",
@@ -45,8 +45,9 @@ local FEATURE_URLS = {
     AutoSubmitSecret   = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/autosubmitsecret.lua",
     QuestGhostfinn     = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/questghostfinn.lua",
     QuestElemental     = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/questelemental.lua",
-    Balatant          = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/balatant.lua",
-    BalatantV2         = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/balatantv2.lua"
+    Balatant           = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/balatant.lua",
+    BalatantV2         = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/balatantv2.lua",
+    AutoBuyMerchant    = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/autobuymerchant.lua"
 }
 
 -- Load single feature synchronously
@@ -113,7 +114,7 @@ function FeatureManager:InitializeAllFeatures(notifyLib, logger)
         "AutoSendTrade", "AutoAcceptTrade", "FishWebhook", "AutoBuyWeather", 
         "AutoBuyBait", "AutoBuyRod", "AutoGearOxyRadar", "CopyJoinServer", 
         "AutoReconnect", "PlayerEsp", "AutoFixFishing", "UnfavoriteAllFish", "PlayerModif", "AutoSubmitSecret", "AutoEnchantRod2", "QuestGhostfinn",
-        "QuestElemental", "Balatant"
+        "QuestElemental", "Balatant", "BalatantV2", "AutoBuyMerchant"
     }
     
     local successCount = 0
