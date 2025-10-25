@@ -16,7 +16,7 @@ local Noctis = loadstring(game:HttpGet("https://raw.githubusercontent.com/HellZo
 -- LOAD HELPERS & FEATURE MANAGER
 -- ===========================
 mainLogger:info("Loading Helpers...")
-local Helpers = loadstring(game:HttpGet("https://raw.githubusercontent.com/HellZone0/RajaKikir/refs/heads/main/module/f/helpers.lua"))()
+local Helpers = loadstring(game:HttpGet("https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/helpers.lua"))()
 
 mainLogger:info("Loading FeatureManager...")
 local FeatureManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/HellZone0/RajaKikir/refs/heads/main/module/f/featuremanager.lua"))()
@@ -147,7 +147,6 @@ endColor = endColor or Color3.fromRGB(0, 200, 200)        -- Teal
     return result
 end
 
--- Create Window
 local Window = Noctis:Window({
     Title = "HellZone",
     Subtitle = "Fish It | v0.1 (Beta Version)",
@@ -171,14 +170,18 @@ local Main       = Group:Tab({ Title = "Main", Image = "gamepad"})
 local Backpack   = Group:Tab({ Title = "Backpack", Image = "backpack"})
 local Automation = Group:Tab({ Title = "Automation", Image = "workflow"})
 local Shop       = Group:Tab({ Title = "Shop", Image = "shopping-bag"})
-local Teleport  = Group:Tab({ Title = "Teleport", Image = "map"})
+local Teleport   = Group:Tab({ Title = "Teleport", Image = "map"})
 local Misc       = Group:Tab({ Title = "Misc", Image = "cog"})
 local Setting    = Group:Tab({ Title = "Settings", Image = "settings"})
 
 --- === CHANGELOG & DISCORD LINK === ---
 local CHANGELOG = table.concat({
     "[+] Added Favorite by Mutation",
-    "[+] Added Buy Merchant",
+    "[+] Added Auto Buy Merchant",
+    "[+] Added Auto Use Totem",
+    "[+] Added Delete Config",
+    "[+] Added Reset Autoload Config",
+    "[/] Changed & Moved Hide Notification to Visual Section",
     "[/] Improved Anti AFK",
     "[/] Improved Auto Favorite",
     "[/] Fixed Webhook (idk why this not working cz for me it works)",
@@ -806,6 +809,36 @@ local sellfish_tgl = SellSection:Toggle({
     end
 }, "sellfishtgl")
 
+--- === TOTEM === ---
+local TotemSection = Backpack:Section({ Title = "Totem", Opened = false })
+local selectedTotem = ""
+
+local totem_dd = TotemSection:Dropdown({
+    Title = "<b>Select Totem</b>",
+    Search = true,
+    Multi = false,
+    Required = false,
+    Values = Helpers.getTotemNames(),
+    Callback = function(v)
+        selectedTotem = Helpers.normalizeOption(v)
+        if F.AutoTotem then
+            F.AutoTotem:SetSelectedTotem(selectedTotem)
+        end
+    end
+}, "totemdd")
+
+local totem_tgl = TotemSection:Toggle({
+    Title = "<b>Auto Use Totem</b>",
+    Default = false,
+    Callback = function(v)
+        if v and F.AutoTotem then
+            F.AutoTotem:Start({ totemName = selectedTotem })
+        elseif F.AutoTotem then
+            F.AutoTotem:Stop()
+        end
+    end
+}, "totemtgl")
+
 --- === TRADE === ---
 local TradeSection = Backpack:Section({ Title = "Trade", Opened = false })
 local selectedTradeItems    = {}
@@ -1267,6 +1300,8 @@ local merchantstock = MerchantSection:Paragraph({
 	Desc = Helpers.getCurrentMerchantStock()
 })
 
+MerchantSection:Divider()
+
 local selectedItemsMerchant = {}
 
 local merchant_ddm = MerchantSection:Dropdown({
@@ -1274,41 +1309,35 @@ local merchant_ddm = MerchantSection:Dropdown({
     Search = true,
     Multi = true,
     Required = false,
-    Values = Helpers.getMarketItemNames(),
+    Values = F.AutoBuyMerchant and F.AutoBuyMerchant:GetItemNames() or {},
     Callback = function(v)
         selectedItemsMerchant = Helpers.normalizeList(v or {})
         if F.AutoBuyMerchant and F.AutoBuyMerchant.SetSelectedItems then
-        F.AutoBuyMerchant:SetSelectedItems(selectedItemsMerchant)
+            F.AutoBuyMerchant:SetSelectedItems(selectedItemsMerchant)
         end
-end
-}, "merchantddm")
-
-MerchantSection:Button({
-	Title = "<b>Buy Merchant Item</b>",
-	Callback = function()
-        F.AutoBuyMerchant:Start({ selectedItems = selectedItemsMerchant, interDelay = 0.5 })
     end
-})
+}, "merchantddm")
 
 local merchantautobuy_tgl = MerchantSection:Toggle({
     Title = "<b>Auto Buy Merchant Item</b>",
     Default = false,
     Callback = function(v)
+        if not F.AutoBuyMerchant then return end
+        
+        if v then
+            F.AutoBuyMerchant:Start()
+        else
+            F.AutoBuyMerchant:Stop()
+        end
     end
 }, "merchantautobuytgl")
-
-local merchantrefresh_tgl = MerchantSection:Toggle({
-    Title = "<b>Auto Refresh Merchant Stock</b>",
-    Default = false,
-    Callback = function(v)
-    end
-}, "merchantrefreshtgl")
 
 MerchantSection:Button({
 	Title = "<b>Refresh Merchant Stock</b>",
 	Callback = function()
         Helpers.monitorMerchantStock(function(text)
-        merchantstock:SetDesc(text) end)
+            merchantstock:SetDesc(text)
+        end)
     end
 })
 
@@ -1554,7 +1583,7 @@ PositionSection:Button({
 local VisualSection = Misc:Section({ Title = "Visual", Opened = false })
 -- State variables
 local customName = "This is HellZone"  -- Default custom name
-local customLevel = "Lv: 999999"       -- Default custom level
+local customLevel = "Lv: 99999"       -- Default custom level
 local nameChangerConnection = nil
 
 -- Function untuk change overhead
@@ -1639,6 +1668,34 @@ local hidenick_tgl = VisualSection:Toggle({
         end
     end
 }, "hidenicktgl")
+
+--- === HIDE NOTIFICATION === ---
+local NotifCtrl = require(game.ReplicatedStorage.Controllers.NotificationController)
+local OriginalPlaySmall = NotifCtrl.PlaySmallItemObtained
+--local OriginalPlayLarge = NotifCtrl.PlayLargeItemObtained
+
+local hidenotif_tgl = VisualSection:Toggle({
+  Title = "<b>Hide Notification</b>",
+  Default = false,
+  Callback = function(v)
+    local SmallNotif = game.Players.LocalPlayer.PlayerGui:WaitForChild("Small Notification")
+        --local TextNotif = game.Players.LocalPlayer.PlayerGui:WaitForChild("Text Notifications")
+        
+        if v then
+            -- HIDE
+            NotifCtrl.PlaySmallItemObtained = function() end
+            --NotifCtrl.PlayLargeItemObtained = function() end
+            SmallNotif.Enabled = false
+            --TextNotif.Enabled = false
+        else
+            -- RESTORE
+            NotifCtrl.PlaySmallItemObtained = OriginalPlaySmall
+            --NotifCtrl.PlayLargeItemObtained = OriginalPlayLarge
+            SmallNotif.Enabled = true
+            --TextNotif.Enabled = true
+        end
+    end
+}, "hidenotiftgl")
 
 --- === WEBHOOK === ---
 local WebhookSection = Misc:Section({ Title = "Webhook", Opened = false })
