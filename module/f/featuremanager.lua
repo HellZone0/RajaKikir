@@ -17,7 +17,7 @@ local FEATURE_URLS = {
     AutoFishV3         = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/autofishv3.lua",
     AutoSellFish       = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/autosellfish.lua",
     AutoTeleportIsland = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/autoteleportisland.lua",
-    FishWebhook        = "https://raw.githubusercontent.com/HellZone0/RajaKikir/refs/heads/main/module/f/fishwebhook.lua",
+    FishWebhook        = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/fishwebhook.lua",
     AutoBuyWeather     = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/autobuyweather.lua",
     AutoBuyBait        = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/autobuybait.lua",
     AutoBuyRod         = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/autobuyrod.lua",
@@ -47,7 +47,8 @@ local FEATURE_URLS = {
     QuestElemental     = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/questelemental.lua",
     Balatant           = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/balatant.lua",
     BalatantV2         = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/balatantv2.lua",
-    AutoBuyMerchant    = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/autobuymerchant.lua"
+    AutoBuyMerchant    = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/autobuymerchant.lua",
+    AutoTotem          = "https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/autototem.lua"
 }
 
 -- Load single feature synchronously
@@ -114,7 +115,7 @@ function FeatureManager:InitializeAllFeatures(notifyLib, logger)
         "AutoSendTrade", "AutoAcceptTrade", "FishWebhook", "AutoBuyWeather", 
         "AutoBuyBait", "AutoBuyRod", "AutoGearOxyRadar", "CopyJoinServer", 
         "AutoReconnect", "PlayerEsp", "AutoFixFishing", "UnfavoriteAllFish", "PlayerModif", "AutoSubmitSecret", "AutoEnchantRod2", "QuestGhostfinn",
-        "QuestElemental", "Balatant", "BalatantV2", "AutoBuyMerchant"
+        "QuestElemental", "Balatant", "BalatantV2", "AutoBuyMerchant", "AutoTotem"
     }
     
     local successCount = 0
