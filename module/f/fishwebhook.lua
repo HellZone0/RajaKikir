@@ -280,6 +280,23 @@ local function getThumbnailUrl(icon)
     return assetId and state.thumbnailCache[assetId] or nil
 end
 
+-- Tambahkan helper ini di dekat getThumbnailUrl:
+local function getOrMakeThumbUrl(icon)
+    local url = getThumbnailUrl(icon)
+    if url and url ~= "" then
+        return url
+    end
+    local assetId = extractAssetId(icon)
+    if assetId then
+        return string.format(
+            "https://www.roblox.com/asset-thumbnail/image?assetId=%s&width=420&height=420&format=png",
+            assetId
+        )
+    end
+    return nil
+end
+
+
 -- ===========================
 -- DATA LOADING
 -- ===========================
@@ -525,7 +542,7 @@ local function buildEmbed(info)
         })
     end
     
-    local thumbUrl = getThumbnailUrl(info.icon)
+    local thumbUrl = getOrMakeThumbUrl(info.icon)
     if thumbUrl then
         if CFG.USE_LARGE_IMAGE then
             embed.image = {url = thumbUrl}
@@ -704,10 +721,14 @@ function FishWebhookV3:Init()
 end
 
 function FishWebhookV3:Start(config)
-    if state.running then return false end
+    config = config or {}
+
+    if state.running then
+        self:Stop()
+    end
     
-    state.webhookUrl = config.webhookUrl or ""
-    state.selectedTiers = asSet(config.selectedTiers or config.selectedFishTypes or {})
+    state.webhookUrl = config.webhookUrl or state.webhookUrl or ""
+    state.selectedTiers = asSet(config.selectedTiers or config.selectedFishTypes or state.selectedTiers or {})
     
     if state.webhookUrl == "" then
         logger:info("No webhook URL")
@@ -767,7 +788,7 @@ function FishWebhookV3:TestWebhook(msg)
     if state.webhookUrl == "" then return false end
     return sendWebhook({
         username = "HellZone Notifier",
-        content = msg or "🟠 Test from Fish-It v3"
+        content = msg or "🟠 Test from Fish-It v0.1"
     })
 end
 
