@@ -16,7 +16,7 @@ local Noctis = loadstring(game:HttpGet("https://raw.githubusercontent.com/HellZo
 -- LOAD HELPERS & FEATURE MANAGER
 -- ===========================
 mainLogger:info("Loading Helpers...")
-local Helpers = loadstring(game:HttpGet("https://raw.githubusercontent.com/HellZone0/RajaKikir/refs/heads/main/module/f/helpers.lua"))()
+local Helpers = loadstring(game:HttpGet("https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/helpers.lua"))()
 
 mainLogger:info("Loading FeatureManager...")
 local FeatureManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/HellZone0/RajaKikir/refs/heads/main/module/f/featuremanager.lua"))()
@@ -147,7 +147,6 @@ endColor = endColor or Color3.fromRGB(0, 200, 200)        -- Teal
     return result
 end
 
--- Create Window
 local Window = Noctis:Window({
     Title = "HellZone",
     Subtitle = "Fish It | v0.1 (Beta Version)",
@@ -182,7 +181,6 @@ local CHANGELOG = table.concat({
     "[+] Added Auto Use Totem",
     "[+] Added Delete Config",
     "[+] Added Reset Autoload Config",
-    "[/] Fixed Save Current Positon",
     "[/] Changed & Moved Hide Notification to Visual Section",
     "[/] Improved Anti AFK",
     "[/] Improved Auto Favorite",
@@ -523,14 +521,10 @@ FishingSection:Button({
 })
 
 local savepos_tgl = FishingSection:Toggle({
-    Title = "<b>Save Current Position</b>",
-    Default = false,
-    Callback = function(v)
-        if v then 
-            F.SavePosition:Start() 
-        else 
-            F.SavePosition:Stop() 
-        end
+	Title = "<b>Save Current Position</b>",
+	Default = false,
+	Callback = function(v)
+        if v then F.SavePosition:Start() else F.SavePosition:Stop() end
     end
 }, "savepostgl")
 
@@ -1589,7 +1583,7 @@ PositionSection:Button({
 local VisualSection = Misc:Section({ Title = "Visual", Opened = false })
 -- State variables
 local customName = "This is HellZone"  -- Default custom name
-local customLevel = "Lv: 999999"       -- Default custom level
+local customLevel = "Lv: 99999"       -- Default custom level
 local nameChangerConnection = nil
 
 -- Function untuk change overhead
@@ -1963,39 +1957,8 @@ Setting:InsertConfigSection()
 Home:Select()
 Noctis:LoadAutoLoadConfig()
 
-Noctis:LoadAutoLoadConfig()
-
-local function AutoStartWebhookIfReady()
-    if not (webhookfish_tgl and webhookfish_tgl.Value) then return end
-    local url   = webhookfish_in.Value or currentWebhookUrl or ""
-    local tiers = webhookfish_ddm.Value or selectedWebhookFishTypes or {}
-    tiers = type(tiers) == "table" and Helpers.normalizeList(tiers) or {}
-
-    -- hardening kecil (opsional): pastikan ini benar2 webhook Discord
-    -- if not url:match("^https://discord%.com/api/webhooks/") then return end
-
-    if url ~= "" and #tiers > 0 and F.FishWebhook and F.FishWebhook.Start then
-        F.FishWebhook:Start({
-            webhookUrl = url,
-            selectedTiers = tiers,
-            selectedFishTypes = tiers
-        })
-    end
-end
-
-task.defer(function()
-    -- barrier ringan: tunggu sampai control terisi oleh LoadConfig
-    local deadline = os.clock() + 3
-    while os.clock() < deadline and (webhookfish_in.Value == nil or webhookfish_ddm.Value == nil) do
-        task.wait(0.05)
-    end
-    AutoStartWebhookIfReady()
-end)
-
-
-
 if F.AntiAfk and F.AntiAfk.Start then
-    F.AntiAfk:Start()
+                F.AntiAfk:Start()
 end
 
 task.defer(function()
