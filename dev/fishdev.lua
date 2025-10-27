@@ -16,7 +16,7 @@ local Noctis = loadstring(game:HttpGet("https://raw.githubusercontent.com/HellZo
 -- LOAD HELPERS & FEATURE MANAGER
 -- ===========================
 mainLogger:info("Loading Helpers...")
-local Helpers = loadstring(game:HttpGet("https://raw.githubusercontent.com/c3iv3r/a/refs/heads/main/module/f/helpers.lua"))()
+local Helpers = loadstring(game:HttpGet("https://raw.githubusercontent.com/HellZone0/RajaKikir/refs/heads/main/module/f/helpers.lua"))()
 
 mainLogger:info("Loading FeatureManager...")
 local FeatureManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/HellZone0/RajaKikir/refs/heads/main/module/f/featuremanager.lua"))()
@@ -176,18 +176,12 @@ local Setting    = Group:Tab({ Title = "Settings", Image = "settings"})
 
 --- === CHANGELOG & DISCORD LINK === ---
 local CHANGELOG = table.concat({
-    "[+] Added Favorite by Mutation",
-    "[+] Added Auto Buy Merchant",
-    "[+] Added Auto Use Totem",
-    "[+] Added Delete Config",
-    "[+] Added Reset Autoload Config",
-    "[/] Changed & Moved Hide Notification to Visual Section",
-    "[/] Improved Anti AFK",
-    "[/] Improved Auto Favorite",
-    "[/] Fixed Webhook (idk why this not working cz for me it works)",
+    "[+] Added Crystal Cavern to Teleport Island",
+    "[/] Improved Auto Fishing",
     "<b>Confused about new features? Join Discord</b>"
 }, "\n")
 local DISCORD = table.concat({
+
     "https://discord.gg/W7QvDkeU",
 }, "\n")
 
@@ -324,11 +318,6 @@ local FishingSection = Main:Section({ Title = "Fishing", Opened = false })
 local currentMethod = "V1" -- default
 local isAutoFishActive = false
 
--- Balatant V5 delay configs
-local balatantWaitWindow = 0.6         -- Default 600ms (ReplicateText check window)
-local balatantSafetyTimeout = 3        -- Default 3s (Safety net timeout)
-local balatantBaitSpawnedDelay = 0
-
 -- Function untuk stop semua
 local function stopAllAutoFish()
     if F.AutoFish and F.AutoFish.Stop then
@@ -339,12 +328,6 @@ local function stopAllAutoFish()
     end
     if F.AutoFishV3 and F.AutoFishV3.Stop then
         F.AutoFishV3:Stop()
-    end
-    if F.Balatant and F.Balatant.Stop then
-        F.Balatant:Stop()
-    end
-    if F.BalatantV2 and F.BalatantV2.Stop then
-        F.BalatantV2:Stop()
     end
 end
 
@@ -358,15 +341,6 @@ local function startAutoFish(method)
         F.AutoFishV2:Start({ mode = "Fast" })
     elseif method == "V3" and F.AutoFishV3 and F.AutoFishV3.Start then
         F.AutoFishV3:Start({ mode = "Fast" })
-    elseif method == "Balatant" and F.Balatant and F.Balatant.Start then
-        F.Balatant:Start({
-            mode = "Fast",
-            waitWindow = balatantWaitWindow,
-            safetyTimeout = balatantSafetyTimeout,
-            baitSpawnedDelay = balatantBaitSpawnedDelay
-        })
-    elseif method == "Balatant V2" and F.BalatantV2 and F.BalatantV2.Start then
-        F.BalatantV2:Start({ mode = "Fast" })
     end
 end
 
@@ -377,7 +351,7 @@ local autofish_dd = FishingSection:Dropdown({
     Search = true,
     Multi = false,
     Required = false,
-    Options = {"Balatant (Delay)", "Balatant (Old)", "Fast", "Stable", "Normal"},
+    Options = {"Fast", "Stable", "Normal"},
     Default = "Fast",
     Callback = function(v)
         -- Map dropdown value ke method
@@ -387,10 +361,6 @@ local autofish_dd = FishingSection:Dropdown({
             currentMethod = "V2"
         elseif v == "Normal" then
             currentMethod = "V3"
-        elseif v == "Balatant (Delay)" then
-            currentMethod = "Balatant"
-        elseif v == "Balatant (Old)" then 
-            currentMethod = "Balatant V2"
         end
         
         -- Kalo lagi aktif, restart dengan method baru
@@ -399,42 +369,6 @@ local autofish_dd = FishingSection:Dropdown({
         end
     end
 }, "autofishdd")
-
--- Detection Window Input (WAIT_WINDOW)
-local baitdelay_in = FishingSection:Input({
-    Name = "<b>Detection Window</b>",
-    Placeholder = "e.g 0.6 (seconds)",
-    AcceptedCharacters = "Numbers",
-    Callback = function(v)
-        local n = tonumber(v)
-        if n and n >= 0.05 and n <= 5 then
-            balatantWaitWindow = n
-            
-            -- Update runtime kalo Balatant lagi jalan
-            if isAutoFishActive and currentMethod == "Balatant" and F.Balatant then
-                F.Balatant:SetDelays(balatantWaitWindow, nil)
-            end
-        end
-    end
-}, "baitdelayin")
-
--- Cast Delay Input (SAFETY_TIMEOUT)
-local chargedelay_in = FishingSection:Input({
-    Name = "<b>Cast Delay</b>",
-    Placeholder = "e.g 3 (seconds)",
-    AcceptedCharacters = "Numbers",
-    Callback = function(v)
-        local n = tonumber(v)
-        if n and n >= 1 and n <= 30 then
-            balatantSafetyTimeout = n
-            
-            -- Update runtime kalo Balatant lagi jalan
-            if isAutoFishActive and currentMethod == "Balatant" and F.Balatant then
-                F.Balatant:SetDelays(nil, balatantSafetyTimeout)
-            end
-        end
-    end
-}, "chargedelayin")
 
 local autofish_tgl = FishingSection:Toggle({
     Title = "<b>Auto Fishing</b>",
@@ -450,16 +384,7 @@ local autofish_tgl = FishingSection:Toggle({
             stopAllAutoFish()
         end
     end
-}, "autofishtgl")
-
-local autofinish_tgl = FishingSection:Toggle({
-    Title = "<b>Auto Finish Fishing</b>",
-    Default = false,
-    Callback = function(v)
-        _G.SpamFishingActive = v
-    end
-}, "autofinishtgl")
-        
+}, "autofishtgl") 
 
 local noanim_tgl = FishingSection:Toggle({
 	Title = "<b>No Animation</b>",
@@ -521,10 +446,14 @@ FishingSection:Button({
 })
 
 local savepos_tgl = FishingSection:Toggle({
-	Title = "<b>Save Current Position</b>",
-	Default = false,
-	Callback = function(v)
-        if v then F.SavePosition:Start() else F.SavePosition:Stop() end
+    Title = "<b>Save Current Position</b>",
+    Default = false,
+    Callback = function(v)
+        if v then 
+            F.SavePosition:Start() 
+        else 
+            F.SavePosition:Stop() 
+        end
     end
 }, "savepostgl")
 
@@ -1369,7 +1298,8 @@ local teleisland_dd = IslandSection:Dropdown({
         "Sacred Temple",
         "Underground Cellar",
         "Hallow Bay",
-        "Mount Hallow"
+        "Mount Hallow",
+        "Crystal Cavern"
     },
        Callback = function(v)
         currentIsland = v or {}
@@ -1957,8 +1887,58 @@ Setting:InsertConfigSection()
 Home:Select()
 Noctis:LoadAutoLoadConfig()
 
+local function AutoStartWebhookIfReady()
+    -- pastikan toggle on. Toggle di Noctis tidak punya .Value, gunakan State atau GetState()
+    local enabled
+    if webhookfish_tgl then
+        enabled = webhookfish_tgl.State or (webhookfish_tgl.GetState and webhookfish_tgl:GetState())
+    end
+    if not enabled then return end
+
+    -- ambil URL & tier. Input tidak punya .Value; gunakan Text atau GetInput()
+    local url = (webhookfish_in and (webhookfish_in.Text or (webhookfish_in.GetInput and webhookfish_in:GetInput()))) or ""
+    -- Dropdown memiliki properti .Value; ini tetap sama
+    local tiers = Helpers.normalizeList(webhookfish_ddm and webhookfish_ddm.Value or {})
+
+     if url == "" or #tiers == 0 then return end
+
+
+     -- ambil instance FishWebhook
+local fw = F.FishWebhook
+if not fw then
+    task.delay(5, AutoStartWebhookIfReady)
+    return
+end
+
+-- pastikan cache ikannya sudah di‑init
+local status = fw:GetStatus()
+if not status or not status.fishCacheSize or status.fishCacheSize == 0 then
+    task.delay(5, AutoStartWebhookIfReady)
+    return
+end
+
+-- baru panggil Start
+fw:Start({
+    webhookUrl        = url,
+    selectedTiers     = tiers,
+    selectedFishTypes = tiers,
+})
+
+end
+
+
+task.defer(function()
+    -- tunggu sampai UI menulis nilai config
+    local deadline = os.clock() + 20
+    while os.clock() < deadline and (webhookfish_in.Value == nil or webhookfish_ddm.Value == nil) do
+        task.wait(0.05)
+    end
+    AutoStartWebhookIfReady()
+end)
+
+
 if F.AntiAfk and F.AntiAfk.Start then
-                F.AntiAfk:Start()
+    F.AntiAfk:Start()
 end
 
 task.defer(function()
